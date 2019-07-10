@@ -20,7 +20,23 @@
         "onView:kubernetes.cloudExplorer"
     ],
     "main": "./out/extension",
-    "contributes": {},
+    "contributes": {
+        "commands": [
+            {
+                "command": "kind.createCluster",
+                "category": "Kind",
+                "title": "Create Cluster"
+            }
+        ],
+        "menus": {
+            "view/item/context": [
+                {
+                    "command": "kind.createCluster",
+                    "when": "viewItem == kubernetes.cloudExplorer.cloud.Kind"
+                }
+            ]
+        }
+    },
     "scripts": {
         "vscode:prepublish": "npm run compile",
         "compile": "tsc -p ./",
