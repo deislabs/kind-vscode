@@ -53,11 +53,13 @@
         "tslint": "^5.8.0",
         "@types/node": "^8.10.25",
         "@types/mocha": "^2.2.42",
-        "@types/shelljs": "^0.8.3"
+        "@types/shelljs": "^0.8.3",
+        "@types/tmp": "0.0.33"
     },
     "dependencies": {
         "replace-string": "^3.0.0",
         "shelljs": "^0.8.3",
+        "tmp": "^0.0.33",
         "vscode-kubernetes-tools-api": "^1.0.0"
     }
 }

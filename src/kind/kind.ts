@@ -39,3 +39,12 @@ export async function getClusters(sh: shell.Shell): Promise<Errorable<KindCluste
 export async function getKubeconfig(sh: shell.Shell, clusterName: string): Promise<Errorable<string>> {
     return invokeObj(sh, `get kubeconfig`, `--name ${clusterName}`, {}, (s) => s);
 }
+
+export async function createCluster(sh: shell.Shell, clusterName: string, image?: string): Promise<Errorable<null>> {
+    const imageArg = image ? `--image ${image}` : '';
+    return invokeObj(sh, 'create cluster', `--name ${clusterName} ${imageArg}`, {}, (_) => null);
+}
+
+export async function createClusterFromConfigFile(sh: shell.Shell, configFilePath: string): Promise<Errorable<null>> {
+    return invokeObj(sh, 'create cluster', `--config ${configFilePath}`, {}, (_) => null);
+}
