@@ -2,6 +2,7 @@ import * as k8s from 'vscode-kubernetes-tools-api';
 import * as vscode from 'vscode';
 import { KIND_CLUSTER_PROVIDER } from './kind-cluster-provider';
 import { KIND_CLOUD_PROVIDER } from './kind-cloud-provider';
+import { onCreateCluster } from './commands/create-cluster';
 
 export async function activate(context: vscode.ExtensionContext) {
     const clusterProvider = await k8s.extension.clusterProvider.v1;
@@ -23,14 +24,4 @@ export async function activate(context: vscode.ExtensionContext) {
     ];
 
     context.subscriptions.push(...disposables);
-}
-
-function onCreateCluster(target?: any) {
-    // if target is the Cloud Explorer root node:
-    //   go to wizard
-    // else if the active document is a Kind cluster spec:
-    //   create from the spec
-    // else
-    //   go to the wizard
-    vscode.window.showInformationMessage(`Hello ${target}`);
 }

@@ -7,6 +7,7 @@ import { shell } from '../utils/shell';
 import { succeeded, Errorable } from '../utils/errorable';
 import { longRunning } from '../utils/host';
 import { Cancellable } from '../utils/cancellable';
+import { showHTMLForm } from '../utils/webview';
 
 export async function onCreateCluster(target?: any): Promise<void> {
     if (target) {
@@ -89,9 +90,30 @@ function isKindClusterSpec(yamlText: string): boolean {
         yamlText.includes('apiVersion: kind.sigs.k8s.io');
 }
 
+const NAME_FIELD_NAME = 'clustername';
+const IMAGE_FIELD_NAME = 'clusterimage';
+
 async function promptClusterSettings(): Promise<Cancellable<InteractiveClusterSettings>> {
-    // repurpose and improvify UI from the cluster provider
-    TODO_IVAN_TODO();
+    // TODO: moar sharing with the cluster provider
+    // TODO: call Docker Hub for available versions, or use a freeform 'image' field to allow custom images
+    // TODO: validation!  (Which might not play nicely with the single-async-return model.)
+    const formHTML = `
+        <p>Cluster name: <input type='text' name='${NAME_FIELD_NAME}' value='kind' /></p>
+        <p>Image version (blank for default): <input type='text' name='${IMAGE_FIELD_NAME}' value='' /></p>
+    `;
+
+    const formResult = await showHTMLForm("kind.createCluster", "Create Kind Cluster", formHTML, "Create Cluster");
+    if (formResult.cancelled) {
+        return formResult;
+    }
+
+    const name = formResult.value[NAME_FIELD_NAME];
+    const image = formResult.value[IMAGE_FIELD_NAME].length > 0 ? formResult.value[IMAGE_FIELD_NAME] : undefined;
+
+    return {
+        cancelled: false,
+        value: { name, image }
+    };
 }
 
 interface ClusterSpecDocument {
