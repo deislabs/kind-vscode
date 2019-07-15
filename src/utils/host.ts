@@ -32,7 +32,19 @@ export async function longRunning<T>(title: string, action: () => Promise<T>): P
     return await vscode.window.withProgress(options, (_) => action());
 }
 
-export async function longRunningWithMessages<T>(title: string, action: () => (Promise<unknown>)[]): Promise<T | undefined> {
+export interface ProgressUpdate {
+    readonly type: 'update';
+    readonly message: string;
+}
+
+export interface ProgressComplete<T> {
+    readonly type: 'complete';
+    readonly value: T;
+}
+
+export type ProgressStep<T> = ProgressUpdate | ProgressComplete<T>;
+
+export async function longRunningWithMessages<T>(title: string, action: () => (Promise<ProgressStep<T>>)[]): Promise<T | undefined> {
     const options = {
         location: vscode.ProgressLocation.Notification,
         title: title
