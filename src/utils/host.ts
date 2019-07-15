@@ -32,6 +32,25 @@ export async function longRunning<T>(title: string, action: () => Promise<T>): P
     return await vscode.window.withProgress(options, (_) => action());
 }
 
+export async function longRunningWithMessages<T>(title: string, action: () => (Promise<unknown>)[]): Promise<T | undefined> {
+    const options = {
+        location: vscode.ProgressLocation.Notification,
+        title: title
+    };
+    async function runAction(progress: vscode.Progress<{ message?: string; increment?: number}>, _token: vscode.CancellationToken): Promise<T | undefined> {
+        for (const a of action()) {
+            const progressInfo = await a;
+            if (progressInfo.type === 'update') {
+                progress.report({ message: progressInfo.message });
+            } else if (progressInfo.type === 'complete') {
+                return progressInfo.value;
+            }
+        }
+        return undefined;
+    }
+    return await vscode.window.withProgress(options, runAction);
+}
+
 export async function showDuffleResult<T>(command: string, resource: string | ((r: T) => string), duffleResult: Errorable<T>): Promise<void> {
     if (failed(duffleResult)) {
         // The invocation infrastructure adds blurb about what command failed, and
