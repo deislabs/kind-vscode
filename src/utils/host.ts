@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 
-import { Errorable, failed } from './errorable';
+import { Observable } from 'rxjs';
 
 export async function selectWorkspaceFolder(placeHolder?: string): Promise<vscode.WorkspaceFolder | undefined> {
     const folders = vscode.workspace.workspaceFolders;
@@ -44,43 +44,31 @@ export interface ProgressComplete<T> {
 
 export type ProgressStep<T> = ProgressUpdate | ProgressComplete<T>;
 
-export async function longRunningWithMessages<T>(title: string, action: () => (Promise<ProgressStep<T>>)[]): Promise<T | undefined> {
+export async function longRunningWithMessages<T>(title: string, progressSteps: Observable<ProgressStep<T>>): Promise<T> {
     const options = {
         location: vscode.ProgressLocation.Notification,
         title: title
     };
-    async function runAction(progress: vscode.Progress<{ message?: string; increment?: number}>, _token: vscode.CancellationToken): Promise<T | undefined> {
-        for (const a of action()) {
-            const progressInfo = await a;
-            if (progressInfo.type === 'update') {
-                progress.report({ message: progressInfo.message });
-            } else if (progressInfo.type === 'complete') {
-                return progressInfo.value;
-            }
-        }
-        return undefined;
+
+    function runAction(progress: vscode.Progress<{ message?: string; increment?: number}>, _token: vscode.CancellationToken): Promise<T> {
+        const promise = new Promise<T>((resolve, reject) => {
+            progressSteps.subscribe(
+                (progressStep) => {
+                    if (progressStep.type === 'update') {
+                        if (progressStep.message && progressStep.message.length > 0) {
+                            progress.report({ message: progressStep.message });
+                        }
+                    } else if (progressStep.type === 'complete') {
+                        resolve(progressStep.value);
+                    }
+                },
+                (error) => reject(error)
+            );
+        });
+        return promise;
     }
+
     return await vscode.window.withProgress(options, runAction);
-}
-
-export async function showDuffleResult<T>(command: string, resource: string | ((r: T) => string), duffleResult: Errorable<T>): Promise<void> {
-    if (failed(duffleResult)) {
-        // The invocation infrastructure adds blurb about what command failed, and
-        // Duffle's CLI parser adds 'Error:'. We don't need that here because we're
-        // going to prepend our own blurb.
-        const message = trimPrefix(duffleResult.error[0], `duffle ${command} error: Error:`).trim();
-        await vscode.window.showErrorMessage(`Duffle ${command} failed: ${message}`);
-    } else {
-        const resourceText = resource instanceof Function ? resource(duffleResult.result) : resource;
-        await vscode.window.showInformationMessage(`Duffle ${command} complete for ${resourceText}`);
-    }
-}
-
-function trimPrefix(text: string, prefix: string): string {
-    if (text.startsWith(prefix)) {
-        return text.substring(prefix.length);
-    }
-    return text;
 }
 
 export async function confirm(text: string, confirmLabel: string): Promise<boolean> {

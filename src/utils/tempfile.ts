@@ -2,12 +2,12 @@ import * as tmp from 'tmp';
 
 import { fs } from './fs';
 
-export async function withTempFile<T>(content: string, fileType: string, fn: (filename: string) => Promise<T>): Promise<T> {
+export async function withTempFile<T>(content: string, fileType: string, fn: (filename: string) => T): Promise<T> {
     const tempFile = tmp.fileSync({ prefix: "vskind-", postfix: `.${fileType}` });
     await fs.writeFile(tempFile.name, content);
 
     try {
-        return await fn(tempFile.name);
+        return fn(tempFile.name);
     } finally {
         tempFile.removeCallback();
     }

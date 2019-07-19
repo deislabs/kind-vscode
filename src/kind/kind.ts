@@ -4,6 +4,7 @@ import * as vscode from 'vscode';
 import { Errorable } from '../utils/errorable';
 import * as shell from '../utils/shell';
 import { KindClusterInfo } from "./kind.objectmodel";
+import { Observable } from 'rxjs';
 
 const logChannel = vscode.window.createOutputChannel("Kind");
 
@@ -26,6 +27,13 @@ function andLog<T>(fn: (s: string) => T): (s: string) => T {
     };
 }
 
+function invokeTracking(sh: shell.Shell, command: string, ...args: string[]): Observable<shell.ProcessTrackingEvent> {
+    const bin = /* config.kindPath() || */ 'kind';
+    const cmd = [...(command.split(' ')), ...args];
+    logChannel.appendLine(`$ ${bin} ${cmd.join(' ')}`);
+    return sh.execTracking(bin, cmd);
+}
+
 export async function getClusters(sh: shell.Shell): Promise<Errorable<KindClusterInfo[]>> {
     function parse(stdout: string): KindClusterInfo[] {
         return stdout.split('\n')
@@ -40,11 +48,11 @@ export async function getKubeconfig(sh: shell.Shell, clusterName: string): Promi
     return invokeObj(sh, `get kubeconfig`, `--name ${clusterName}`, {}, (s) => s);
 }
 
-export async function createCluster(sh: shell.Shell, clusterName: string, image?: string): Promise<Errorable<null>> {
-    const imageArg = image ? `--image ${image}` : '';
-    return invokeObj(sh, 'create cluster', `--name ${clusterName} ${imageArg}`, {}, (_) => null);
+export function createCluster(sh: shell.Shell, clusterName: string, image?: string): Observable<shell.ProcessTrackingEvent> {
+    const imageArgs = image ? ['--image', image] : [];
+    return invokeTracking(sh, 'create cluster', '--name', clusterName, ...imageArgs);
 }
 
-export async function createClusterFromConfigFile(sh: shell.Shell, configFilePath: string): Promise<Errorable<null>> {
-    return invokeObj(sh, 'create cluster', `--config ${configFilePath}`, {}, (_) => null);
+export function createClusterFromConfigFile(sh: shell.Shell, configFilePath: string): Observable<shell.ProcessTrackingEvent> {
+    return invokeTracking(sh, 'create cluster', '--config', configFilePath);
 }

@@ -1,13 +1,16 @@
 import * as vscode from 'vscode';
+import { map } from 'rxjs/operators';
 
 import * as kind from '../kind/kind';
 import { safeFilePath } from '../utils/uri';
 import { withTempFile } from '../utils/tempfile';
-import { shell } from '../utils/shell';
+import { shell, ProcessTrackingEvent } from '../utils/shell';
 import { succeeded, Errorable } from '../utils/errorable';
-import { longRunning } from '../utils/host';
+import { longRunningWithMessages, ProgressStep } from '../utils/host';
 import { Cancellable } from '../utils/cancellable';
 import { showHTMLForm } from '../utils/webview';
+import { cantHappen } from '../utils/never';
+import { Observable } from 'rxjs';
 
 export async function onCreateCluster(target?: any): Promise<void> {
     if (target) {
@@ -29,19 +32,39 @@ async function createClusterInteractive(): Promise<void> {
     if (settings.cancelled) {
         return;
     }
-    const result = await longRunning("Creating Kind cluster...", () =>
-        kind.createCluster(shell, settings.value.name, settings.value.image)
+
+    const progressSteps = kind.createCluster(shell, settings.value.name, settings.value.image).pipe(
+        map((e) => progressOf(e))
     );
-    await displayClusterCreationResult(result);
+
+    await displayClusterCreationUI(progressSteps);
 }
 
 async function createClusterFromSpec(document: ClusterSpecDocument): Promise<void> {
-    const result = await longRunning("Creating Kind cluster...", () =>
-        withClusterSpec(document, (filename) =>
-            kind.createClusterFromConfigFile(shell, filename)
+    const progressSteps = await withClusterSpec(document, (filename) =>
+        kind.createClusterFromConfigFile(shell, filename).pipe(
+            map((e) => progressOf(e))
         )
     );
+
+    await displayClusterCreationUI(progressSteps);
+}
+
+async function displayClusterCreationUI(progressSteps: Observable<ProgressStep<Errorable<null>>>): Promise<void> {
+    const result = await longRunningWithMessages("Creating Kind cluster", progressSteps);
     await displayClusterCreationResult(result);
+}
+
+function progressOf(e: ProcessTrackingEvent): ProgressStep<Errorable<null>> {
+    if (e.eventType === 'line') {
+        return { type: 'update', message: e.text };
+    } else if (e.eventType === 'succeeded') {
+        return { type: 'complete', value: { succeeded: true, result: null } };
+    } else if (e.eventType === 'failed') {
+        return { type: 'complete', value: { succeeded: false, error: [e.stderr] } };
+    } else {
+        return cantHappen(e);
+    }
 }
 
 async function displayClusterCreationResult(result: Errorable<null>): Promise<void> {
@@ -73,9 +96,9 @@ function activeDocumentAsClusterSpec(): ClusterSpecDocument | undefined {
     return undefined;
 }
 
-function withClusterSpec<T>(document: ClusterSpecDocument, fn: (filename: string) => Promise<T>): Promise<T> {
+async function withClusterSpec<T>(document: ClusterSpecDocument, fn: (filename: string) => T): Promise<T> {
     if (document.dirty || !document.path) {
-        return withTempFile<T>(document.text, 'yaml', fn);
+        return await withTempFile<T>(document.text, 'yaml', fn);
     }
     return fn(document.path);
 }
