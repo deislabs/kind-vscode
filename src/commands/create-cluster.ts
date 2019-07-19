@@ -13,36 +13,49 @@ import { cantHappen } from '../utils/never';
 import { Observable } from 'rxjs';
 
 export async function onCreateCluster(target?: any): Promise<void> {
-    if (target) {
-        await createClusterInteractive();
-        return;
-    }
+    // Config documents aren't self-contained: you still need to prompt for the name
+    // and image.  So when should we take a config document into account?
+    // The current solution is:
+    // 1. If the command was launched from Cloud Explorer, *DO NOT* use a config document.
+    //    The user isn't looking at the document so we shouldn't apply it.
+    // 2. If the command was launched from the Command Palette, and the active document
+    //    is a config document, *USE IT*.  The user has probably been working in the
+    //    editor and wants to go with the settings they've been working on.
+    // 3. Otherwise, don't use a config document, because it's not obvious which if any
+    //    document to use.
+    // Does this seem reasonable?  Is there a better strategy?
 
-    const clusterSpec = activeDocumentAsClusterSpec();
-    if (clusterSpec) {
-        await createClusterFromSpec(clusterSpec);
-        return;
-    }
+    const clusterSpec = activeDocumentAsClusterSpec();  // Capture this here, because we're about to display an interactive prompt which will make the current document inactive
 
-    await createClusterInteractive();
-}
-
-async function createClusterInteractive(): Promise<void> {
     const settings = await promptClusterSettings();
     if (settings.cancelled) {
         return;
     }
 
-    const progressSteps = kind.createCluster(shell, settings.value.name, settings.value.image).pipe(
+    if (target) {
+        await createClusterInteractive(settings.value);
+        return;
+    }
+
+    if (clusterSpec) {
+        await createClusterFromSpec(clusterSpec, settings.value);
+        return;
+    }
+
+    await createClusterInteractive(settings.value);
+}
+
+async function createClusterInteractive(settings: InteractiveClusterSettings): Promise<void> {
+    const progressSteps = kind.createCluster(shell, settings.name, settings.image, undefined).pipe(
         map((e) => progressOf(e))
     );
 
     await displayClusterCreationUI(progressSteps);
 }
 
-async function createClusterFromSpec(document: ClusterSpecDocument): Promise<void> {
+async function createClusterFromSpec(document: ClusterSpecDocument, settings: InteractiveClusterSettings): Promise<void> {
     const progressSteps = await withClusterSpec(document, (filename) =>
-        kind.createClusterFromConfigFile(shell, filename).pipe(
+        kind.createCluster(shell, settings.name, settings.image, filename).pipe(
             map((e) => progressOf(e))
         )
     );
@@ -146,6 +159,7 @@ interface ClusterSpecDocument {
     readonly path: string | undefined;
 }
 
+// Settings that are gathered interactively (because they can't be set in the config file)
 interface InteractiveClusterSettings {
     readonly name: string;
     readonly image: string | undefined;

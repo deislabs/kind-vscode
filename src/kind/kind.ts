@@ -48,11 +48,8 @@ export async function getKubeconfig(sh: shell.Shell, clusterName: string): Promi
     return invokeObj(sh, `get kubeconfig`, `--name ${clusterName}`, {}, (s) => s);
 }
 
-export function createCluster(sh: shell.Shell, clusterName: string, image?: string): Observable<shell.ProcessTrackingEvent> {
+export function createCluster(sh: shell.Shell, clusterName: string, image: string | undefined, configFilePath: string | undefined): Observable<shell.ProcessTrackingEvent> {
     const imageArgs = image ? ['--image', image] : [];
-    return invokeTracking(sh, 'create cluster', '--name', clusterName, ...imageArgs);
-}
-
-export function createClusterFromConfigFile(sh: shell.Shell, configFilePath: string): Observable<shell.ProcessTrackingEvent> {
-    return invokeTracking(sh, 'create cluster', '--config', configFilePath);
+    const configFileArgs = configFilePath ? ['--config', configFilePath] : [];
+    return invokeTracking(sh, 'create cluster', '--name', clusterName, ...imageArgs, ...configFileArgs);
 }
