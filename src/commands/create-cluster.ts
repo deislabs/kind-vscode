@@ -1,12 +1,12 @@
 import * as vscode from 'vscode';
-import { map } from 'rxjs/operators';
+import { map, filter } from 'rxjs/operators';
 
 import * as kind from '../kind/kind';
 import { safeFilePath } from '../utils/uri';
 import { withTempFile } from '../utils/tempfile';
 import { shell, ProcessTrackingEvent } from '../utils/shell';
 import { succeeded, Errorable } from '../utils/errorable';
-import { longRunningWithMessages, ProgressStep } from '../utils/host';
+import { longRunningWithMessages, ProgressStep, ProgressUpdate } from '../utils/host';
 import { Cancellable } from '../utils/cancellable';
 import { showHTMLForm } from '../utils/webview';
 import { cantHappen } from '../utils/never';
@@ -51,7 +51,8 @@ async function createClusterFromSpec(document: ClusterSpecDocument): Promise<voi
 }
 
 async function displayClusterCreationUI(progressSteps: Observable<ProgressStep<Errorable<null>>>): Promise<void> {
-    const result = await longRunningWithMessages("Creating Kind cluster", progressSteps);
+    const progressToDisplay = undecorateClusterCreationOutput(progressSteps);
+    const result = await longRunningWithMessages("Creating Kind cluster", progressToDisplay);
     await displayClusterCreationResult(result);
 }
 
@@ -148,4 +149,15 @@ interface ClusterSpecDocument {
 interface InteractiveClusterSettings {
     readonly name: string;
     readonly image: string | undefined;
+}
+
+function undecorateClusterCreationOutput<T>(events: Observable<ProgressStep<T>>): Observable<ProgressStep<T>> {
+    const interestingUpdatePrefix = '• ';
+    const stripPrefix = (e: ProgressUpdate) => ({ type: 'update' as const, message: e.message.substring(interestingUpdatePrefix.length) } as ProgressUpdate);
+    const isIgnorableUpdate = (e: ProgressStep<T>) => e.type === 'update' && !e.message.startsWith(interestingUpdatePrefix);
+    const undecorate = (e: ProgressStep<T>) => e.type === 'update' ? stripPrefix(e) : e;
+    return events.pipe(
+        filter((e) => !isIgnorableUpdate(e)),
+        map((e) => undecorate(e))
+    );
 }
