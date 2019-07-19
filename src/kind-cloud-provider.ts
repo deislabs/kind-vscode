@@ -57,7 +57,7 @@ async function getClusters(): Promise<KindCloudProviderTreeNode[]> {
     if (failed(clusters)) {
         return [{ nodeType: 'error', diagnostic: clusters.error[0] }];
     }
-    return clusters.result.map((c) => ({ nodeType: 'cluster', clusterName: c.name }));
+    return clusters.result.map((c) => ({ nodeType: 'cluster', clusterName: c.name } as const));
 }
 
 async function getKindKubeconfigYaml(clusterName: string): Promise<string | undefined> {
