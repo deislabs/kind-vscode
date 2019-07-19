@@ -17,7 +17,8 @@
     "activationEvents": [
         "onCommand:extension.vsKubernetesConfigureFromCluster",
         "onCommand:extension.vsKubernetesCreateCluster",
-        "onView:kubernetes.cloudExplorer"
+        "onView:kubernetes.cloudExplorer",
+        "onCommand:kind.createCluster"
     ],
     "main": "./out/extension",
     "contributes": {
