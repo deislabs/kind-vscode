@@ -48,7 +48,7 @@
         "ms-kubernetes-tools.vscode-kubernetes-tools"
     ],
     "devDependencies": {
-        "typescript": "^2.6.1",
+        "typescript": "^3.5.2",
         "vscode": "^1.1.21",
         "tslint": "^5.8.0",
         "@types/node": "^8.10.25",
@@ -58,7 +58,9 @@
     },
     "dependencies": {
         "replace-string": "^3.0.0",
+        "rxjs": "^6.4.0",
         "shelljs": "^0.8.3",
+        "spawn-rx": "^3.0.0",
         "tmp": "^0.0.33",
         "vscode-kubernetes-tools-api": "^1.0.0"
     }
