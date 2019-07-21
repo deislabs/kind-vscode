@@ -5,7 +5,7 @@ import * as kind from '../kind/kind';
 import { safeFilePath } from '../utils/uri';
 import { withTempFile } from '../utils/tempfile';
 import { shell, ProcessTrackingEvent } from '../utils/shell';
-import { succeeded, Errorable } from '../utils/errorable';
+import { succeeded, Errorable, failed } from '../utils/errorable';
 import { longRunningWithMessages, ProgressStep, ProgressUpdate } from '../utils/host';
 import { Cancellable } from '../utils/cancellable';
 import { showHTMLForm } from '../utils/webview';
@@ -128,15 +128,19 @@ function isKindClusterSpec(yamlText: string): boolean {
 }
 
 const NAME_FIELD_NAME = 'clustername';
-const IMAGE_FIELD_NAME = 'clusterimage';
+const STANDARD_IMAGE_FIELD_NAME = 'clusterimage_standard';
+const CUSTOM_IMAGE_FIELD_NAME = 'clusterimage_custom';
 
 async function promptClusterSettings(): Promise<Cancellable<InteractiveClusterSettings>> {
     // TODO: moar sharing with the cluster provider
-    // TODO: call Docker Hub for available versions, or use a freeform 'image' field to allow custom images
     // TODO: validation!  (Which might not play nicely with the single-async-return model.)
+    const standardImageOptions = (await standardImages()).map((image) => `<option value='${image.id}'>${image.name}</option>`)
+                                                         .join('\n');
     const formHTML = `
         <p>Cluster name: <input type='text' name='${NAME_FIELD_NAME}' value='kind' /></p>
-        <p>Image version (blank for default): <input type='text' name='${IMAGE_FIELD_NAME}' value='' /></p>
+        <p>Node image version (custom image takes precedence if specified; leave both blank for default)</p>
+        <p>- Standard image: <select name='${STANDARD_IMAGE_FIELD_NAME}'>${standardImageOptions}</select></p>
+        <p>- Custom image: <input type='text' name='${CUSTOM_IMAGE_FIELD_NAME}' value='' /></p>
     `;
 
     const formResult = await showHTMLForm("kind.createCluster", "Create Kind Cluster", formHTML, "Create Cluster");
@@ -145,12 +149,61 @@ async function promptClusterSettings(): Promise<Cancellable<InteractiveClusterSe
     }
 
     const name = formResult.value[NAME_FIELD_NAME];
-    const image = formResult.value[IMAGE_FIELD_NAME].length > 0 ? formResult.value[IMAGE_FIELD_NAME] : undefined;
+    const standardImage = formResult.value[STANDARD_IMAGE_FIELD_NAME];
+    const customImage = formResult.value[CUSTOM_IMAGE_FIELD_NAME];
+    // TODO: okay for custom to take priority?
+    const image = (customImage && customImage.length > 0) ? customImage : ((standardImage.length > 0) ? standardImage : undefined);
 
     return {
         cancelled: false,
         value: { name, image }
     };
+}
+
+async function standardImages(): Promise<StandardImage[]> {
+    const defaultImage = { name: '', id: ''};  // always have a blank for default
+    const version = await kind.version(shell);
+    if (failed(version)) {
+        return [defaultImage];
+    }
+    const standardImages = standardImagesForVersion(version.result);
+    return [defaultImage].concat(...standardImages);
+}
+
+function standardImagesForVersion(version: string): StandardImage[] {
+    return standardImageIdsForVersion(version).map(imageify);
+}
+
+function standardImageIdsForVersion(version: string): string[] {
+    if (version.startsWith('v0.1') || version.startsWith('v0.2')) {
+        return [];
+    } else if (version.startsWith('v0.3')) {
+        return [
+            'kindest/nodev1.14.2@sha256:33539d830a6cf20e3e0a75d0c46a4e94730d78c7375435e6b49833d81448c319',
+            'kindest/node:v1.13.6@sha256:9e07014fb48c746deb98ec8aafd58c3918622eca6063e643c6e6d86c86e170b4',
+            'kindest/node:v1.12.8@sha256:cc6e1a928a85c14b52e32ea97a198393fb68097f14c4d4c454a8a3bc1d8d486c',
+            'kindest/node:v1.11.10@sha256:abd0275ead5ddfd477b7bc491f71957d7dd75408a346834ffe8a9bee5fbdc15b',
+        ];
+    } else {
+        // For now, assume 0.4+ all use these images.  WHICH WILL NOT BE TRUE.
+        return [
+            'kindest/node:v1.15.0@sha256:b4d092fd2b507843dd096fe6c85d06a27a0cbd740a0b32a880fe61aba24bb478',
+            'kindest/node:v1.14.3@sha256:583166c121482848cd6509fbac525dd62d503c52a84ff45c338ee7e8b5cfe114',
+            'kindest/node:v1.13.7@sha256:f3f1cfc2318d1eb88d91253a9c5fa45f6e9121b6b1e65aea6c7ef59f1549aaaf',
+            'kindest/node:v1.12.9@sha256:bcb79eb3cd6550c1ba9584ce57c832dcd6e442913678d2785307a7ad9addc029',
+            'kindest/node:v1.11.10@sha256:176845d919899daef63d0dbd1cf62f79902c38b8d2a86e5fa041e491ab795d33',
+        ];
+    }
+}
+
+function imageify(imageId: string): StandardImage {
+    const bits = imageId.split('@');
+    return { name: bits[0], id: imageId };
+}
+
+interface StandardImage {
+    readonly name: string;
+    readonly id: string;
 }
 
 interface ClusterSpecDocument {

@@ -53,3 +53,7 @@ export function createCluster(sh: shell.Shell, clusterName: string, image: strin
     const configFileArgs = configFilePath ? ['--config', configFilePath] : [];
     return invokeTracking(sh, 'create cluster', '--name', clusterName, ...imageArgs, ...configFileArgs);
 }
+
+export async function version(sh: shell.Shell): Promise<Errorable<string>> {
+    return invokeObj(sh, `version`, '', {}, (s) => s.trim());
+}
