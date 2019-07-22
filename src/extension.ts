@@ -3,6 +3,7 @@ import * as vscode from 'vscode';
 import { KIND_CLUSTER_PROVIDER } from './kind-cluster-provider';
 import { KIND_CLOUD_PROVIDER } from './kind-cloud-provider';
 import { onCreateCluster } from './commands/create-cluster';
+import { onDeleteCluster } from './commands/delete-cluster';
 
 export async function activate(context: vscode.ExtensionContext) {
     const clusterProvider = await k8s.extension.clusterProvider.v1;
@@ -21,6 +22,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
     const disposables = [
         vscode.commands.registerCommand("kind.createCluster", onCreateCluster),
+        vscode.commands.registerCommand("kind.deleteCluster", onDeleteCluster),
     ];
 
     context.subscriptions.push(...disposables);

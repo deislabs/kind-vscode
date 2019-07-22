@@ -18,7 +18,8 @@
         "onCommand:extension.vsKubernetesConfigureFromCluster",
         "onCommand:extension.vsKubernetesCreateCluster",
         "onView:kubernetes.cloudExplorer",
-        "onCommand:kind.createCluster"
+        "onCommand:kind.createCluster",
+        "onCommand:kind.deleteCluster"
     ],
     "main": "./out/extension",
     "contributes": {
@@ -27,6 +28,11 @@
                 "command": "kind.createCluster",
                 "category": "Kind",
                 "title": "Create Cluster"
+            },
+            {
+                "command": "kind.deleteCluster",
+                "category": "Kind",
+                "title": "Delete Cluster"
             }
         ],
         "menus": {
@@ -34,6 +40,10 @@
                 {
                     "command": "kind.createCluster",
                     "when": "viewItem == kubernetes.cloudExplorer.cloud.Kind"
+                },
+                {
+                    "command": "kind.deleteCluster",
+                    "when": "viewItem =~ /kind\\.cluster/"
                 }
             ]
         }

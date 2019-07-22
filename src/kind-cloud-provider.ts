@@ -40,7 +40,7 @@ class KindTreeDataProvider implements vscode.TreeDataProvider<KindCloudProviderT
             return treeItem;
         } else {
             const treeItem = new vscode.TreeItem(element.clusterName, vscode.TreeItemCollapsibleState.None);
-            treeItem.contextValue = k8s.CloudExplorerV1.SHOW_KUBECONFIG_COMMANDS_CONTEXT;
+            treeItem.contextValue = `kind.cluster ${k8s.CloudExplorerV1.SHOW_KUBECONFIG_COMMANDS_CONTEXT}`;
             return treeItem;
         }
     }
