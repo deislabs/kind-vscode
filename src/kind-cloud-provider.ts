@@ -98,3 +98,10 @@ function renameDistinctUser(kubeconfig: string, clusterName: string): string {
 }
 
 export const KIND_CLOUD_PROVIDER = new KindCloudProvider();
+
+export async function refresh(): Promise<void> {
+    const cloudExplorer = await k8s.extension.cloudExplorer.v1;
+    if (cloudExplorer.available) {
+        cloudExplorer.api.refresh();
+    }
+}

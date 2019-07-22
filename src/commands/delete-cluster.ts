@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import * as k8s from 'vscode-kubernetes-tools-api';
 
 import * as kind from '../kind/kind';
+import * as kindCloudProvider from '../kind-cloud-provider';
 import { shell } from '../utils/shell';
 import { failed, Errorable, succeeded } from '../utils/errorable';
 import { longRunning, confirm } from '../utils/host';
@@ -43,8 +44,10 @@ async function deleteClusterByName(clusterName: string): Promise<void> {
 
 async function displayClusterDeletionResult(result: Errorable<null>, clusterName: string): Promise<void> {
     if (succeeded(result)) {
-        // TODO: refresh cloud explorer
-        await vscode.window.showInformationMessage(`Deleted cluster ${clusterName}`);
+        await Promise.all([
+            vscode.window.showInformationMessage(`Deleted cluster ${clusterName}`),
+            kindCloudProvider.refresh()
+        ]);
     } else {
         await vscode.window.showErrorMessage(`Deleting Kind cluster failed: ${result.error[0]}`);
     }

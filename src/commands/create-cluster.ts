@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import { map, filter } from 'rxjs/operators';
 
 import * as kind from '../kind/kind';
+import * as kindCloudProvider from '../kind-cloud-provider';
 import { safeFilePath } from '../utils/uri';
 import { withTempFile } from '../utils/tempfile';
 import { shell, ProcessTrackingEvent } from '../utils/shell';
@@ -83,8 +84,10 @@ function progressOf(e: ProcessTrackingEvent): ProgressStep<Errorable<null>> {
 
 async function displayClusterCreationResult(result: Errorable<null>): Promise<void> {
     if (succeeded(result)) {
-        // TODO: refresh cloud explorer, option to kick off merging kubeconfig (which should in turn refresh cluster explorer)
-        await vscode.window.showInformationMessage("Created Kind cluster");
+        await Promise.all([
+            vscode.window.showInformationMessage("Created Kind cluster"),
+            kindCloudProvider.refresh()
+        ]);
     } else {
         await vscode.window.showErrorMessage(`Creating Kind cluster failed: ${result.error[0]}`);
     }
