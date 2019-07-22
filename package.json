@@ -16,6 +16,7 @@
         "kubernetes",
         "kind"
     ],
+    "icon": "images/kind-logo.png",
     "activationEvents": [
         "onCommand:extension.vsKubernetesConfigureFromCluster",
         "onCommand:extension.vsKubernetesCreateCluster",
