@@ -3,6 +3,9 @@
 This extension displays your `kind` local cluster in the Kubernetes extension's Cloud Explorer.
 You can use this to create and delete clusters, and to merge them into your kubeconfig.
 
+**This is an early stage preview. It's not feature complete! Feature requests welcome via the issues page.
+(And let us know about bugs too!)**
+
 # Contributing
 
 This project welcomes contributions and suggestions.  Most contributions require you to agree to a
