@@ -56,6 +56,10 @@ export function createCluster(sh: shell.Shell, clusterName: string, image: strin
     return invokeTracking(sh, 'create cluster', '--name', clusterName, ...imageArgs, ...configFileArgs);
 }
 
+export function deleteCluster(sh: shell.Shell, clusterName: string): Promise<Errorable<null>> {
+    return invokeObj(sh, 'delete cluster', `--name ${clusterName}`, {}, (_) => null);
+}
+
 export async function version(sh: shell.Shell): Promise<Errorable<string>> {
     return invokeObj(sh, `version`, '', {}, (s) => s.trim());
 }

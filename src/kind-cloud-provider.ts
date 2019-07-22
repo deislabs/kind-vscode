@@ -17,17 +17,17 @@ class KindCloudProvider implements k8s.CloudExplorerV1.CloudProvider {
     }
 }
 
-interface KindCloudProviderClusterNode {
+export interface KindCloudProviderClusterNode {
     readonly nodeType: 'cluster';
     readonly clusterName: string;
 }
 
-interface KindCloudProviderErrorNode {
+export interface KindCloudProviderErrorNode {
     readonly nodeType: 'error';
     readonly diagnostic: string;
 }
 
-type KindCloudProviderTreeNode = KindCloudProviderClusterNode | KindCloudProviderErrorNode;
+export type KindCloudProviderTreeNode = KindCloudProviderClusterNode | KindCloudProviderErrorNode;
 
 class KindTreeDataProvider implements vscode.TreeDataProvider<KindCloudProviderTreeNode> {
     private onDidChangeTreeDataEmitter: vscode.EventEmitter<KindCloudProviderTreeNode | undefined> = new vscode.EventEmitter<KindCloudProviderTreeNode | undefined>();
@@ -40,7 +40,7 @@ class KindTreeDataProvider implements vscode.TreeDataProvider<KindCloudProviderT
             return treeItem;
         } else {
             const treeItem = new vscode.TreeItem(element.clusterName, vscode.TreeItemCollapsibleState.None);
-            treeItem.contextValue = k8s.CloudExplorerV1.SHOW_KUBECONFIG_COMMANDS_CONTEXT;
+            treeItem.contextValue = `kind.cluster ${k8s.CloudExplorerV1.SHOW_KUBECONFIG_COMMANDS_CONTEXT}`;
             return treeItem;
         }
     }
