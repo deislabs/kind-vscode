@@ -5,6 +5,7 @@ import { Errorable } from '../utils/errorable';
 import * as shell from '../utils/shell';
 import { KindClusterInfo } from "./kind.objectmodel";
 import { Observable } from 'rxjs';
+import '../utils/array';
 
 const logChannel = vscode.window.createOutputChannel("Kind");
 
@@ -39,7 +40,8 @@ export async function getClusters(sh: shell.Shell): Promise<Errorable<KindCluste
         return stdout.split('\n')
             .map((l) => l.trim())
             .filter((l) => l.length > 0)
-            .map((l) => ({ name: l }));
+            .map((l) => ({ name: l }))
+            .orderBy((c) => c.name);  // Possibly this shouldn't be mixed up with the raw CLI module but I can't think of a time when we'd want the internal order
     }
     return invokeObj(sh, 'get clusters', '', {}, parse);
 }
