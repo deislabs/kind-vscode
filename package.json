@@ -2,7 +2,7 @@
     "name": "kind-vscode",
     "displayName": "Kubernetes Kind",
     "description": "Work with the Kind local Kubernetes provider in Visual Studio Code",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "preview": true,
     "publisher": "ms-kubernetes-tools",
     "engines": {
@@ -14,7 +14,8 @@
     ],
     "keywords": [
         "kubernetes",
-        "kind"
+        "kind",
+        "kubernetes-extension-cloud-provider"
     ],
     "icon": "images/kind-logo.png",
     "activationEvents": [

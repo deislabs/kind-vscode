@@ -6,6 +6,14 @@ You can use this to create and delete clusters, and to merge them into your kube
 **This is an early stage preview. It's not feature complete! Feature requests welcome via the issues page.
 (And let us know about bugs too!)**
 
+# Prerequisites
+
+You must have the `kind` binary on your system path.  You can download the binaries for your operating system
+from https://github.com/kubernetes-sigs/kind/releases.
+
+This version of the extension has been tested only with Kind 0.4.0 (and only on Windows so far, though it
+should work on other OSes).
+
 # Contributing
 
 This project welcomes contributions and suggestions.  Most contributions require you to agree to a
