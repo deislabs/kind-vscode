@@ -74,5 +74,9 @@
         "spawn-rx": "^3.0.0",
         "tmp": "^0.0.33",
         "vscode-kubernetes-tools-api": "^1.0.0"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/deislabs/kind-vscode"
     }
 }
