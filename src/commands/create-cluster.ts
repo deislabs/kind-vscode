@@ -138,7 +138,7 @@ async function promptClusterSettings(): Promise<Cancellable<InteractiveClusterSe
                                                          .join('\n');
     const formHTML = `
         <p>Cluster name: <input type='text' name='${NAME_FIELD_NAME}' value='kind' /></p>
-        <p>Node image version (custom image takes precedence if specified; leave both blank for default)</p>
+        <p>Node image version (custom image takes precedence if specified)</p>
         <p>- Standard image: <select name='${STANDARD_IMAGE_FIELD_NAME}'>${standardImageOptions}</select></p>
         <p>- Custom image: <input type='text' name='${CUSTOM_IMAGE_FIELD_NAME}' value='' /></p>
     `;
@@ -161,7 +161,7 @@ async function promptClusterSettings(): Promise<Cancellable<InteractiveClusterSe
 }
 
 async function standardImages(): Promise<StandardImage[]> {
-    const defaultImage = { name: '', id: ''};  // always have a blank for default
+    const defaultImage = { name: 'Use the default image', id: ''};  // always have a blank for default
     const version = await kind.version(shell);
     if (failed(version)) {
         return [defaultImage];
