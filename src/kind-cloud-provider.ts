@@ -1,7 +1,8 @@
 import * as k8s from 'vscode-kubernetes-tools-api';
 import * as vscode from 'vscode';
+import * as kind from './kind/kind';
 import { shell } from './utils/shell';
-import { failed, succeeded } from './utils/errorable';
+import { failed } from './utils/errorable';
 import './utils/string';
 
 class KindCloudProvider implements k8s.CloudExplorerV1.CloudProvider {
@@ -52,23 +53,22 @@ class KindTreeDataProvider implements vscode.TreeDataProvider<KindCloudProviderT
 }
 
 async function getClusters(): Promise<KindCloudProviderTreeNode[]> {
-    const sr = await shell.exec('kind get clusters');
-    if (failed(sr) || sr.result.code !== 0) {
-        return [{ nodeType: 'error', diagnostic: succeeded(sr) ? sr.result.stderr : sr.error[0] }];
+    const clusters = await kind.getClusters(shell);
+    if (failed(clusters)) {
+        return [{ nodeType: 'error', diagnostic: clusters.error[0] }];
     }
-    const lines = sr.result.stdout.split('\n').map((l) => l.trim()).filter((l) => l.length > 0);
-    return lines.map((l) => ({ nodeType: 'cluster', clusterName: l }));
+    return clusters.result.map((c) => ({ nodeType: 'cluster', clusterName: c.name } as const));
 }
 
 async function getKindKubeconfigYaml(clusterName: string): Promise<string | undefined> {
-    const sr = await shell.exec(`kind get kubeconfig --name ${clusterName}`);
-    if (succeeded(sr) && sr.result.code === 0) {
-        const originalKubeconfig = sr.result.stdout;
-        const distinctKubeconfig = renameDistinctUser(originalKubeconfig, clusterName);
-        return distinctKubeconfig;
+    const kcyaml = await kind.getKubeconfig(shell, clusterName);
+    if (failed(kcyaml)) {
+        vscode.window.showErrorMessage(`Can't get kubeconfig for ${clusterName}: ${kcyaml.error[0]}`);
+        return undefined;
     }
-    vscode.window.showErrorMessage(`Can't get kubeconfig for ${clusterName}: ${succeeded(sr) ? sr.result.stderr : sr.error[0]}`);
-    return undefined;
+    const originalKubeconfig = kcyaml.result;
+    const distinctKubeconfig = renameDistinctUser(originalKubeconfig, clusterName);
+    return distinctKubeconfig;
 }
 
 function renameDistinctUser(kubeconfig: string, clusterName: string): string {
