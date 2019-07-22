@@ -1,10 +1,10 @@
-# `kind` Local Cluster Sample
+# Kind (Kubernetes IN Docker)... in VS Code
 
-This sample adds the `kind` local cluster to the Kubernetes extension's Create Cluster wizard.
+This extension displays your `kind` local cluster in the Kubernetes extension's Cloud Explorer.
+You can use this to create and delete clusters, and to merge them into your kubeconfig.
 
-It demonstrates:
-
-* Adding cluster types to the cluster wizard
+**This is an early stage preview. It's not feature complete! Feature requests welcome via the issues page.
+(And let us know about bugs too!)**
 
 # Contributing
 

@@ -3,10 +3,12 @@
     "displayName": "Kubernetes Kind",
     "description": "Work with the Kind local Kubernetes provider in Visual Studio Code",
     "version": "0.0.1",
+    "preview": true,
     "publisher": "ms-kubernetes-tools",
     "engines": {
         "vscode": "^1.32.0"
     },
+    "license": "MIT",
     "categories": [
         "Other"
     ],
@@ -14,6 +16,7 @@
         "kubernetes",
         "kind"
     ],
+    "icon": "images/kind-logo.png",
     "activationEvents": [
         "onCommand:extension.vsKubernetesConfigureFromCluster",
         "onCommand:extension.vsKubernetesCreateCluster",
@@ -21,7 +24,7 @@
         "onCommand:kind.createCluster",
         "onCommand:kind.deleteCluster"
     ],
-    "main": "./out/extension",
+    "main": "./dist/extension",
     "contributes": {
         "commands": [
             {
@@ -49,9 +52,10 @@
         }
     },
     "scripts": {
-        "vscode:prepublish": "npm run compile",
-        "compile": "tsc -p ./",
-        "watch": "tsc -watch -p ./",
+        "vscode:prepublish": "webpack --mode production",
+        "compile": "webpack --mode none",
+        "watch": "webpack --mode none --watch",
+        "test-compile": "tsc -p ./",
         "postinstall": "node ./node_modules/vscode/bin/install",
         "test": "npm run compile && node ./node_modules/vscode/bin/test"
     },
@@ -59,13 +63,16 @@
         "ms-kubernetes-tools.vscode-kubernetes-tools"
     ],
     "devDependencies": {
+        "@types/mocha": "^2.2.42",
+        "@types/node": "^8.10.25",
+        "@types/shelljs": "^0.8.3",
+        "@types/tmp": "0.0.33",
+        "ts-loader": "^6.0.4",
+        "tslint": "^5.8.0",
         "typescript": "^3.5.2",
         "vscode": "^1.1.21",
-        "tslint": "^5.8.0",
-        "@types/node": "^8.10.25",
-        "@types/mocha": "^2.2.42",
-        "@types/shelljs": "^0.8.3",
-        "@types/tmp": "0.0.33"
+        "webpack": "^4.36.1",
+        "webpack-cli": "^3.3.6"
     },
     "dependencies": {
         "replace-string": "^3.0.0",
@@ -74,5 +81,9 @@
         "spawn-rx": "^3.0.0",
         "tmp": "^0.0.33",
         "vscode-kubernetes-tools-api": "^1.0.0"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/deislabs/kind-vscode"
     }
 }
