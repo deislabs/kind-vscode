@@ -50,6 +50,15 @@
                     "when": "viewItem =~ /kind\\.cluster/"
                 }
             ]
+        },
+        "configuration": {
+            "properties": {
+                "kind-unknown-version-image-versions": {
+                    "type": "array",
+                    "items": "string",
+                    "default": []
+                }
+            }
         }
     },
     "scripts": {
