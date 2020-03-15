@@ -187,8 +187,7 @@ function standardImageIdsForVersion(version: string): string[] {
             'kindest/node:v1.12.8@sha256:cc6e1a928a85c14b52e32ea97a198393fb68097f14c4d4c454a8a3bc1d8d486c',
             'kindest/node:v1.11.10@sha256:abd0275ead5ddfd477b7bc491f71957d7dd75408a346834ffe8a9bee5fbdc15b',
         ];
-    } else {
-        // For now, assume 0.4+ all use these images.  WHICH WILL NOT BE TRUE.
+    } else if (version.startsWith('v0.4')) {
         return [
             'kindest/node:v1.15.0@sha256:b4d092fd2b507843dd096fe6c85d06a27a0cbd740a0b32a880fe61aba24bb478',
             'kindest/node:v1.14.3@sha256:583166c121482848cd6509fbac525dd62d503c52a84ff45c338ee7e8b5cfe114',
@@ -196,6 +195,35 @@ function standardImageIdsForVersion(version: string): string[] {
             'kindest/node:v1.12.9@sha256:bcb79eb3cd6550c1ba9584ce57c832dcd6e442913678d2785307a7ad9addc029',
             'kindest/node:v1.11.10@sha256:176845d919899daef63d0dbd1cf62f79902c38b8d2a86e5fa041e491ab795d33',
         ];
+    } else if (version.startsWith('v0.5')) {
+        return [
+            'kindest/node:v1.15.3@sha256:27e388752544890482a86b90d8ac50fcfa63a2e8656a96ec5337b902ec8e5157',
+            'kindest/node:v1.14.6@sha256:464a43f5cf6ad442f100b0ca881a3acae37af069d5f96849c1d06ced2870888d',
+            'kindest/node:v1.13.10@sha256:2f5f882a6d0527a2284d29042f3a6a07402e1699d792d0d5a9b9a48ef155fa2a',
+            'kindest/node:v1.12.10@sha256:e43003c6714cc5a9ba7cf1137df3a3b52ada5c3f2c77f8c94a4d73c82b64f6f3',
+            'kindest/node:v1.11.10@sha256:bb22258625199ba5e47fb17a8a8a7601e536cd03456b42c1ee32672302b1f909',
+        ];
+    } else if (version.startsWith('v0.6')) {
+        return [
+            'kindest/node:v1.16.3@sha256:70ce6ce09bee5c34ab14aec2b84d6edb260473a60638b1b095470a3a0f95ebec',
+            'kindest/node:v1.15.6@sha256:18c4ab6b61c991c249d29df778e651f443ac4bcd4e6bdd37e0c83c0d33eaae78',
+            'kindest/node:v1.14.9@sha256:bdd3731588fa3ce8f66c7c22f25351362428964b6bca13048659f68b9e665b72',
+            'kindest/node:v1.13.12@sha256:1fe072c080ee129a2a440956a65925ab3bbd1227cf154e2ade145b8e59a584ad',
+            'kindest/node:v1.12.10@sha256:c5aeca1433e3230e6c1a96b5e1cd79c90139fd80242189b370a3248a05d77118',
+            'kindest/node:v1.11.10@sha256:8ebe805201da0a988ee9bbcc2de2ac0031f9264ac24cf2a598774f1e7b324fe1',
+        ];
+    } else if (version.startsWith('v0.7')) {
+        return [
+            'kindest/node:v1.17.0@sha256:9512edae126da271b66b990b6fff768fbb7cd786c7d39e86bdf55906352fdf62',
+            'kindest/node:v1.16.4@sha256:b91a2c2317a000f3a783489dfb755064177dbc3a0b2f4147d50f04825d016f55',
+            'kindest/node:v1.15.7@sha256:e2df133f80ef633c53c0200114fce2ed5e1f6947477dbc83261a6a921169488d',
+            'kindest/node:v1.14.10@sha256:81ae5a3237c779efc4dda43cc81c696f88a194abcc4f8fa34f86cf674aa14977',
+            'kindest/node:v1.13.12@sha256:5e8ae1a4e39f3d151d420ef912e18368745a2ede6d20ea87506920cd947a7e3a',
+            'kindest/node:v1.12.10@sha256:68a6581f64b54994b824708286fafc37f1227b7b54cbb8865182ce1e036ed1cc',
+            'kindest/node:v1.11.10@sha256:e6f3dade95b7cb74081c5b9f3291aaaa6026a90a977e0b990778b6adc9ea6248',
+        ];
+    } else {
+        return vscode.workspace.getConfiguration().get('kind-unknown-version-image-versions') || [];
     }
 }
 
