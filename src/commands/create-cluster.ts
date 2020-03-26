@@ -165,12 +165,20 @@ async function promptClusterSettings(): Promise<Cancellable<InteractiveClusterSe
 
 async function standardImages(): Promise<StandardImage[]> {
     const defaultImage = { name: 'Use the default image', id: ''};  // always have a blank for default
-    const version = await kind.version(shell);
-    if (failed(version)) {
+    const versionText = await kind.version(shell);
+    if (failed(versionText)) {
         return [defaultImage];
     }
-    const standardImages = standardImagesForVersion(version.result);
+    const version = trimToVersion(versionText.result);
+    const standardImages = standardImagesForVersion(version);
     return [defaultImage].concat(...standardImages);
+}
+
+function trimToVersion(versionText: string): string {
+    if (versionText.startsWith('kind ')) {
+        return versionText.substring('kind '.length);
+    }
+    return versionText;
 }
 
 function standardImagesForVersion(version: string): StandardImage[] {
@@ -214,6 +222,7 @@ function standardImageIdsForVersion(version: string): string[] {
         ];
     } else if (version.startsWith('v0.7')) {
         return [
+            'kindest/node:v1.18.0@sha256:0e20578828edd939d25eb98496a685c76c98d54084932f76069f886ec315d694',
             'kindest/node:v1.17.0@sha256:9512edae126da271b66b990b6fff768fbb7cd786c7d39e86bdf55906352fdf62',
             'kindest/node:v1.16.4@sha256:b91a2c2317a000f3a783489dfb755064177dbc3a0b2f4147d50f04825d016f55',
             'kindest/node:v1.15.7@sha256:e2df133f80ef633c53c0200114fce2ed5e1f6947477dbc83261a6a921169488d',
