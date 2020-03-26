@@ -1,5 +1,11 @@
 # Change Log
 
+## 0.0.3
+
+- Updated standard images for recent Kind versions
+- Added Kubernetes 1.18 standard image for Kind 0.7
+- Updated dependencies
+
 ## 0.0.2
 
 - Added discoverability keyword for Cloud Explorer
