@@ -63,11 +63,11 @@ function createCluster(previousData: any): k8s.ClusterProviderV1.Observable<stri
             const imageVersion: string = previousData[SETTING_IMAGE_VERSION];
             const imageArg = (imageVersion && imageVersion.length > 0) ? `--image kindest/node:${imageVersion}` : '';
             const childProcess = shelljs.exec(`kind create cluster --name ${clusterName} ${imageArg}`, { async: true }) as ChildProcess;
-            childProcess.stdout.on('data', (chunk: string) => {
+            childProcess!.stdout!.on('data', (chunk: string) => {
                 stdout += chunk;
                 observer.onNext(html());
             });
-            childProcess.stderr.on('data', (chunk: string) => {
+            childProcess!.stderr!.on('data', (chunk: string) => {
                 stderr += chunk;
                 observer.onNext(html());
             });

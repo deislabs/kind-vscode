@@ -6,7 +6,7 @@
     "preview": true,
     "publisher": "ms-kubernetes-tools",
     "engines": {
-        "vscode": "^1.32.0"
+        "vscode": "^1.67.0"
     },
     "license": "MIT",
     "categories": [
@@ -63,34 +63,39 @@
     },
     "scripts": {
         "vscode:prepublish": "webpack --mode production",
-        "compile": "webpack --mode none",
-        "watch": "webpack --mode none --watch",
+        "webpack": "webpack --mode production",
+        "webpack-dev": "webpack --mode development --watch --info-verbosity verbose",
         "test-compile": "tsc -p ./",
-        "postinstall": "node ./node_modules/vscode/bin/install",
-        "test": "npm run compile && node ./node_modules/vscode/bin/test"
+        "compile": "webpack --mode none",
+        "watch": "tsc -watch -p ./",
+        "test": "mocha -V && npm run test-compile && node ./out/tests/runTests.js"
     },
     "extensionDependencies": [
         "ms-kubernetes-tools.vscode-kubernetes-tools"
     ],
     "devDependencies": {
-        "@types/mocha": "^2.2.42",
-        "@types/node": "^8.10.25",
-        "@types/shelljs": "^0.8.3",
-        "@types/tmp": "0.0.33",
-        "ts-loader": "^6.0.4",
-        "tslint": "^5.8.0",
-        "typescript": "^3.5.2",
-        "vscode": "^1.1.36",
-        "webpack": "^4.36.1",
-        "webpack-cli": "^3.3.6"
+        "@types/mocha": "^2.2.48",
+        "@types/node": "^16.11.7",
+        "@types/tmp": "^0.2.3",
+        "@types/vscode": "^1.52.0",
+        "eslint": "^8.27.0",
+        "mocha": "^9.0.2",
+        "ts-loader": "^9.4.2",
+        "typescript": "^4.9.3",
+        "webpack": "^5.75.0",
+        "webpack-cli": "^4.10.0"
     },
     "dependencies": {
+        "@types/shelljs": "^0.8.11",
+        "@types/vscode": "^1.73.1",
+        "@vscode/test-electron": "^2.2.0",
         "replace-string": "^3.0.0",
         "rxjs": "^6.4.0",
         "shelljs": "^0.8.3",
         "spawn-rx": "^3.0.0",
-        "tmp": "^0.0.33",
-        "vscode-kubernetes-tools-api": "^1.0.0"
+        "tmp": "^0.2.1",
+        "vscode-kubernetes-tools-api": "^1.0.0",
+        "webpack-node-externals": "^3.0.0"
     },
     "repository": {
         "type": "git",

@@ -68,7 +68,7 @@ function execCore(cmd: string, opts: any, stdin?: string): Promise<ShellResult> 
     return new Promise<ShellResult>((resolve, _reject) => {
         const proc = shelljs.exec(cmd, opts, (code, stdout, stderr) => resolve({ code: code, stdout: stdout, stderr: stderr }));
         if (stdin) {
-            proc.stdin.end(stdin);
+            proc!.stdin!.end(stdin);
         }
     });
 }

@@ -8,6 +8,9 @@ const path = require('path');
 const config = {
   target: 'node',
   entry: './src/extension.ts',
+  optimization: {
+    minimize: false
+  },
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: 'extension.js',
@@ -19,7 +22,10 @@ const config = {
     vscode: 'commonjs vscode'
   },
   resolve: {
-    extensions: ['.ts', '.js']
+    extensions: ['.ts', '.js', '.json'],
+    alias: {
+      'handlebars' : 'handlebars/dist/handlebars.js',
+    },
   },
   module: {
     rules: [
@@ -33,6 +39,10 @@ const config = {
         ]
       }
     ]
+  },
+  node: {
+    __dirname: false,
+    __filename: false,
   }
 };
 module.exports = config;

@@ -33,7 +33,7 @@ class KindTreeDataProvider implements vscode.TreeDataProvider<KindCloudProviderT
     private onDidChangeTreeDataEmitter: vscode.EventEmitter<KindCloudProviderTreeNode | undefined> = new vscode.EventEmitter<KindCloudProviderTreeNode | undefined>();
     readonly onDidChangeTreeData: vscode.Event<KindCloudProviderTreeNode | undefined> = this.onDidChangeTreeDataEmitter.event;
 
-    getTreeItem(element: KindCloudProviderTreeNode): vscode.TreeItem | Thenable<vscode.TreeItem> {
+    getTreeItem(element: KindCloudProviderTreeNode): vscode.TreeItem {
         if (element.nodeType === 'error') {
             const treeItem = new vscode.TreeItem("Error", vscode.TreeItemCollapsibleState.None);
             treeItem.tooltip = element.diagnostic;
