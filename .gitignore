@@ -1,6 +1,7 @@
 out
 dist
 node_modules
+vsix
 .vscode-test/
 *.vsix
-.vscode/settings.json
+.DS_Store
