@@ -22,10 +22,7 @@ const config = {
     vscode: 'commonjs vscode'
   },
   resolve: {
-    extensions: ['.ts', '.js', '.json'],
-    alias: {
-      'handlebars' : 'handlebars/dist/handlebars.js',
-    },
+    extensions: ['.ts', '.js', '.json']
   },
   module: {
     rules: [
